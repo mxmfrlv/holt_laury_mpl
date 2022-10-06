@@ -44,7 +44,7 @@
 {# *** TITLE *** #}
 {# ****************************************************************************************************************** #}
 {% block title %}
-    {% trans "Your Decision" %}
+    {{ trans("Your Decision") }}
 {% endblock %}
 
 
@@ -60,9 +60,11 @@
         <!-- ------------------------------------------------------------------------------------------------------- -->
         {% if Constants.one_choice_per_page == True and Constants.progress_bar == True %}
             <label>
-                {% blocktrans trimmed with page=page total=total %}
+				{% if fr %}
+					Page {{ page }} sur {{ total }}
+				{% else %}
                     Page {{ page }} of {{ total }}
-                {% endblocktrans %}
+                {% endif %}
             </label>
             <div class="progress">
                 <div class="progress-bar" role="progressbar" style="width:{{ progress|json }}%;">
@@ -81,38 +83,30 @@
                 <table class="table">
                     <thead>
                         <tr class="header">
-                            <th class="center">{% trans "Option A" %}</th>
-                            <th class="center">{% trans "Option B" %}</th>
+                            <th class="center">{{ trans("Option A") }}</th>
+                            <th class="center">{{ trans("Option B") }}</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {% for i,f,p in choices %}
+                        {% for i,f,p,pies_a,pies_b in choices %}
                             <tr>
                                 <td class="pie-chart">
-                                    {% with j=i|stringformat:"s" %}
-                                        {% with pies_a="pie_a_"|add:j %}
                                             <div id="{{ pies_a }}" class="pie-chart"></div>
-                                        {% endwith %}
-                                    {% endwith %}
                                 </td>
                                 <td class="pie-chart">
-                                    {% with j=i|stringformat:"s" %}
-                                        {% with pies_b="pie_b_"|add:j %}
-                                            <div id="{{ pies_b }}" class="pie-chart"></div>
-                                        {% endwith %}
-                                    {% endwith %}
+                                             <div id="{{ pies_b }}" class="pie-chart"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="center">
                                     <button name="{{ f }}" value="A" class="btn btn-primary">
-                                        {% trans "Option A" %}
+                                        {{ trans("Option A") }}
                                     </button>
                                 </td>
                                 <td class="center">
                                     <button name="{{ f }}" value="B" class="btn btn-primary">
-                                        {% trans "Option B" %}
+                                        {{ trans("Option B") }}
                                     </button>
                                 </td>
                             </tr>
@@ -134,9 +128,9 @@
                             {% if Constants.small_pies == True %}
                                 <th class="pie-chart"></th>
                             {% endif %}
-                            <th class="lottery-a">{% trans "Option A" %}</th>
+                            <th class="lottery-a">{{ trans("Option A") }}</th>
                             <th class="formfield"></th>
-                            <th class="lottery-b">{% trans "Option B" %}</th>
+                            <th class="lottery-b">{{ trans("Option B") }}</th>
                             {% if Constants.small_pies == True %}
                                 <th class="pie-chart"></th>
                             {% endif %}
@@ -144,23 +138,19 @@
                     </thead>
 
                     <tbody>
-                        {% for i,f,p in choices %}
+                        {% for i,f,p,pies_a,pies_b in choices %}
                             <tr>
                                 <!-- pie charts for A lotteries -->
                                 {% if Constants.small_pies == True %}
                                     <td class="pie-chart">
-                                        {% with j=i|stringformat:"s" %}
-                                            {% with pies_a="pie_a_"|add:j %}
                                                 <div id="{{ pies_a }}" class="pie-chart"></div>
-                                            {% endwith %}
-                                        {% endwith %}
-                                    </td>
+                                     </td>
                                 {% endif %}
 
                                 <!-- A lotteries -->
                                 <td class="lottery-a">
-                                    {{ lottery_a_hi }} {% trans "with a probability of " %}{{ p }},<br/>
-                                    {{ lottery_a_lo }} {% trans "otherwise" %}
+                                    {{ lottery_a_hi }} {{ trans("with a probability of") }} {{ p }},<br/>
+                                    {{ lottery_a_lo }} {{ trans("otherwise") }}
                                 </td>
 
                                 <!-- radio select form fields -->
@@ -171,18 +161,14 @@
 
                                 <!-- B lotteries -->
                                 <td class="lottery-b">
-                                    {{ lottery_b_hi }} {% trans "with a probability of " %}{{ p }},<br/>
-                                    {{ lottery_b_lo }} {% trans "otherwise" %}
+                                    {{ lottery_b_hi }} {{ trans("with a probability of") }} {{ p }},<br/>
+                                    {{ lottery_b_lo }} {{ trans("otherwise") }}
                                 </td>
 
                                 <!-- pie charts for B lotteries -->
                                 {% if Constants.small_pies == True %}
                                     <td class="pie-chart">
-                                        {% with j=i|stringformat:"s" %}
-                                        {% with pies_b="pie_b_"|add:j %}
                                             <div id="{{ pies_b }}" class="pie-chart"></div>
-                                        {% endwith %}
-                                        {% endwith %}
                                     </td>
                                 {% endif %}
                             </tr>

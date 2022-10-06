@@ -2,10 +2,23 @@ from otree.api import (
     models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer,
     Currency as c, currency_range
 )
-from mpl.config import *
+
+# from mpl.config import *
 import random
 from random import randrange
+import importlib, os
 
+APP_DIR=os.path.basename(os.path.dirname(__file__))
+
+mdl = importlib.import_module(APP_DIR+'.config')
+# is there an __all__?  if so respect it
+if "__all__" in mdl.__dict__:
+    names = mdl.__dict__["__all__"]
+else:
+    # otherwise we import all names that don't begin with _
+    names = [x for x in mdl.__dict__ if not x.startswith("_")]
+# now drag them in
+globals().update({k: getattr(mdl, k) for k in names})
 
 author = 'Felix Holzmeister'
 
@@ -50,7 +63,7 @@ class Subsession(BaseSubsession):
                 # create list of choices
                 # ----------------------------------------------------------------------------------------------------
                 p.participant.vars['mpl_choices'] = list(
-                    zip(indices, form_fields, probabilities)
+                    zip(indices, form_fields, probabilities, ["pie_a_%d"%i for i in indices],  ["pie_b_%d"%i for i in indices] )
                 )
 
                 # randomly determine index/choice of binary decision to pay
@@ -101,6 +114,7 @@ class Player(BasePlayer):
     option_to_pay = models.StringField()
     inconsistent = models.IntegerField()
     switching_row = models.IntegerField()
+    current_payoff = models.FloatField()
 
     # set player's payoff
     # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -120,20 +134,25 @@ class Player(BasePlayer):
 
         # set player's payoff
         # ------------------------------------------------------------------------------------------------------------
+        my_payoff = 0
         if self.option_to_pay == 'A':
             if self.random_draw <= self.participant.vars['mpl_index_to_pay']:
-                self.payoff = Constants.lottery_a_hi
+                my_payoff = Constants.lottery_a_hi
             else:
-                self.payoff = Constants.lottery_a_lo
+                my_payoff = Constants.lottery_a_lo
         else:
             if self.random_draw <= self.participant.vars['mpl_index_to_pay']:
-                self.payoff = Constants.lottery_b_hi
+                my_payoff = Constants.lottery_b_hi
             else:
-                self.payoff = Constants.lottery_b_lo
-
+                my_payoff = Constants.lottery_b_lo
+        
+        if not Constants.hypothetic:
+            self.payoff = my_payoff
+        self.current_payoff = my_payoff
         # set payoff as global variable
         # ------------------------------------------------------------------------------------------------------------
-        self.participant.vars['mpl_payoff'] = self.payoff
+        self.participant.vars['mpl_payoff'] = my_payoff
+        self.participant.holt_laury_gain = my_payoff
 
     # determine consistency
     # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

@@ -2,24 +2,35 @@ from otree.api import Currency as c, currency_range
 from . import models
 from ._builtin import Page, WaitPage
 from .models import Constants
+from settings import LANGUAGE_CODE
+import os
 
+which_language = {'en': False, 'de': False, 'fr': False}  # noqa
+which_language[LANGUAGE_CODE[:2]] = True
+from .lexicon import Lexicon
 
 # variables for all templates
 # --------------------------------------------------------------------------------------------------------------------
 def vars_for_all_templates(self):
-    return {
+
+    res = {
         'lottery_a_lo': c(Constants.lottery_a_lo),
         'lottery_a_hi': c(Constants.lottery_a_hi),
         'lottery_b_lo': c(Constants.lottery_b_lo),
-        'lottery_b_hi': c(Constants.lottery_b_hi)
+        'lottery_b_hi': c(Constants.lottery_b_hi),
+        'trans': trans,
     }
+    res.update(which_language)
+    # print(res)
+    return res
 
-
+def trans(phrase):
+    lex=Lexicon(LANGUAGE_CODE[:2])
+    return lex.get(phrase)
 # ******************************************************************************************************************** #
 # *** CLASS INSTRUCTIONS *** #
 # ******************************************************************************************************************** #
 class Instructions(Page):
-
     # only display instruction in round 1
     # ----------------------------------------------------------------------------------------------------------------
     def is_displayed(self):
@@ -28,9 +39,10 @@ class Instructions(Page):
     # variables for template
     # ----------------------------------------------------------------------------------------------------------------
     def vars_for_template(self):
-        return {
-            'num_choices':  len(self.participant.vars['mpl_choices'])
-        }
+        #print(LANGUAGE_CODE);print(LOCALE_PATHS);print(BASE_DIR);
+        return {**{
+            'num_choices':  len(self.participant.vars['mpl_choices']),
+        },**vars_for_all_templates(self)}
 
 
 # ******************************************************************************************************************** #
@@ -64,17 +76,19 @@ class Decision(Page):
         total = len(self.participant.vars['mpl_choices'])
         page = self.subsession.round_number
         progress = page / total * 100
+        # print(self.player.participant.vars['mpl_choices'])
 
         if Constants.one_choice_per_page:
-            return {
+            return {**{
                 'page':      page,
                 'total':     total,
-                'progress':  progress,
-                'choices':   [self.player.participant.vars['mpl_choices'][page - 1]]
+                'progress':  progress,          
+            },**(vars_for_all_templates(self))
             }
         else:
-            return {
+            return {**{
                 'choices':   self.player.participant.vars['mpl_choices']
+                },**(vars_for_all_templates(self))
             }
 
     # set player's payoff
@@ -144,6 +158,7 @@ class Results(Page):
         # unzip <mpl_choices> into list of lists
         choices = [list(t) for t in zip(*self.participant.vars['mpl_choices'])]
         indices = choices[0]
+        
 
         # get index, round, and choice to pay
         index_to_pay = self.player.participant.vars['mpl_index_to_pay']
@@ -151,16 +166,20 @@ class Results(Page):
         choice_to_pay = self.participant.vars['mpl_choices'][round_to_pay - 1]
 
         if Constants.one_choice_per_page:
-            return {
+            return {**{
                 'choice_to_pay':  [choice_to_pay],
                 'option_to_pay':  self.player.in_round(round_to_pay).option_to_pay,
-                'payoff':         self.player.in_round(round_to_pay).payoff,
+                'payoff':         c(self.player.in_round(round_to_pay).current_payoff),
+                }
+                **(vars_for_all_templates(self))
             }
         else:
-            return {
+            return {**{
                 'choice_to_pay':  [choice_to_pay],
                 'option_to_pay':  self.player.option_to_pay,
-                'payoff':         self.player.payoff
+                'payoff':         c(self.player.current_payoff),
+                },
+                **(vars_for_all_templates(self))
             }
 
 

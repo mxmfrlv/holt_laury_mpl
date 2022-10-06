@@ -1,0 +1,80 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree %}
+{% load i18n %}
+
+
+{# ****************************************************************************************************************** #}
+{# *** STYLES *** #}
+{# ****************************************************************************************************************** #}
+{% block styles %}
+    <link href="{% static 'mpl/css/custom.css' %}" rel="stylesheet"/>
+{% endblock %}
+
+
+{# ****************************************************************************************************************** #}
+{# *** TITLE *** #}
+{# ****************************************************************************************************************** #}
+{% block title %}
+    {{ trans("Instructions") }}
+{% endblock %}
+
+
+{# ****************************************************************************************************************** #}
+{# *** CONTENT *** #}
+{# ****************************************************************************************************************** #}
+{% block content %}
+
+    <div class="wrapper instructions">
+        <p>
+			{% if fr %}
+                Dans ce qui suit, vous serez confronté à {{ num_choices }} décisions répertoriées sur votre écran. Chaque décision est un
+                choix entre "Option A" et "Option B". Alors que les gains des deux options sont fixes pour tous
+                décisions, les chances d'obtenir un gain élevé varient pour chaque option.
+            {% else %}
+                In the following, you'll face {{ num_choices }} decisions listed on your screen. Each decision is a paired
+                choice between "Option A" and "Option B". While the payoffs of the two options are fixed for all
+                decisions, the chances of the high payoff for each option will vary.
+            {% endif %}
+        </p>
+		{{ if Constants.hypothetic }}
+		<p>
+			{% if fr %}
+                Les choix que vous ferez sont <strong>hypothétiques</strong>. Ils n'auront aucune conséquence sur votre paiement.
+            {% else %}
+                The choices you make are <strong>hypothetical</strong>. They will have no consequence on your payment.
+            {% endif %}
+		</p>
+		{{ else }}
+        <p>
+			{% if fr %}
+                Après avoir fait tous vos choix, l'une des {{ num_choices }} décisions sera choisie au hasard pour
+                votre paiement. Pour l'option que vous avez choisie dans cette décision (A ou B), le hasard
+                (selon les probabilités correspondantes) déterminera si le résultat faible ou élevé constituera votre
+                paiement.
+            {% else %}
+                After you have made all of your choices, one of the {{ num_choices }} decisions will be randomly chosen for
+                your payment. For the option you chose, A or B, in this decision, it will be randomly determined
+                (according to the corresponding probabilities) whether the low or high outcome will constitute your
+                payoff.
+             {% endif %}
+       </p>
+        <p>
+			{% if fr %}
+				Pour résumer : vous ferez {{ num_choices }} choix ; pour chaque décision vous devrez choisir entre
+                 "Option A" et "Option B". Vous pouvez choisir A pour certaines lignes de décision et B pour d'autres lignes. Lorsque
+                 vous avez terminé, l'une des {{ num_choices }} décisions sera choisie au hasard pour votre gain. Puis un
+                 nombre sera tiré au sort pour déterminer votre gain pour l'option que vous avez choisie dans cette décision.
+            {% else %}
+                To summarize: You will make {{ num_choices }} choices; for each decision you will have to choose between
+                "Option A" and "Option B". You may choose A for some decision rows and B for other rows. When
+                you are finished, one of the {{ num_choices }} decisions will be randomly picked for your payoff. Then a
+                random number will be drawn to determine your earnings for the option you chose in that decision.
+            {% endif %}
+        </p>
+		{{ endif }}
+
+    </div>
+
+    {% next_button %}
+
+{% endblock %}
